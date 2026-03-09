@@ -193,7 +193,7 @@ const resources = {
       joinCommunity:
         "Присоединяйтесь к нашему сообществу любителей роскошных автомобилей.",
       getStartedToday: "Начать сейчас",
-      featured: "ИЗБРАННОЕ",
+      // featured: "ИЗБРАННОЕ",
     },
   },
   en: {
@@ -383,7 +383,7 @@ const resources = {
       joinCommunity:
         "Join our exclusive community of luxury automobile enthusiasts.",
       getStartedToday: "Get Started Today",
-      featured: "FEATURED",
+      // featured: "FEATURED",
     },
   },
 
@@ -572,7 +572,7 @@ const resources = {
       readyLuxury: "Элиталык люкска даярсызбы?",
       joinCommunity: "Люкс унаа сүйүүчүлөрүнүн коомчулугуна кошулуңуз.",
       getStartedToday: "Бүгүн баштаңыз",
-      featured: "ТАНДАЛГАН",
+      // featured: "ТАНДАЛГАН",
     },
   },
 };
