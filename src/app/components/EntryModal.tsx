@@ -25,15 +25,14 @@ export default function EntryModal({ onClose }: EntryModalProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
-      onClick={onClose}
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 overflow-y-auto"
     >
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
         transition={{ type: "spring", duration: 0.5 }}
-        className="relative w-full max-w-4xl bg-gradient-to-br from-background via-background to-[var(--gold)]/5 rounded-2xl border border-[var(--gold)]/30 shadow-2xl overflow-hidden"
+        className="relative w-full max-w-4xl max-h-[90vh] bg-gradient-to-br from-background via-background to-[var(--gold)]/5 rounded-2xl border border-[var(--gold)]/30 shadow-2xl overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
@@ -49,7 +48,7 @@ export default function EntryModal({ onClose }: EntryModalProps) {
         <div className="absolute top-0 right-0 w-96 h-96 bg-[var(--gold)]/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-[var(--gold)]/5 rounded-full blur-3xl" />
 
-        <div className="relative p-12 md:p-16 min-h-[640px] md:min-h-auto">
+        <div className="relative p-12 md:p-16 ">
           {/* Header */}
           <div className="text-center mb-12">
             <motion.div
@@ -58,9 +57,9 @@ export default function EntryModal({ onClose }: EntryModalProps) {
               transition={{ delay: 0.2 }}
               className="inline-block mb-4"
             >
-              <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center">
-                <span className="text-4xl font-bold text-white">LA</span>
-              </div>
+              {/* <div className="w-20 h-5 mx-auto rounded-2xl bg-gradient-to-br from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center">
+                <span className="text-2xl font-bold text-white">LA</span>
+              </div> */}
             </motion.div>
 
             <motion.h1
