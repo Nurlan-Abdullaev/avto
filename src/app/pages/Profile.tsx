@@ -6,13 +6,14 @@ import { User, LogOut, Settings, Crown } from "lucide-react";
 import { getCurrentUser, signInWithGoogle, signOut } from "../../utils/auth";
 import { getAllListings } from "../../utils/storage";
 import { toast } from "sonner";
+import { deleteListing } from "../../utils/storage";
 
 export default function Profile() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [user, setUser] = useState(getCurrentUser());
   const [isAuthenticating, setIsAuthenticating] = useState(false);
-  const [userListings, setUserListings] = useState(0);
+  const [userListings, setUserListings] = useState<any[]>([]);
 
   useEffect(() => {
     const currentUser = getCurrentUser();
@@ -22,7 +23,7 @@ export default function Profile() {
       const listings = getAllListings().filter(
         (l) => l.userId === currentUser.id,
       );
-      setUserListings(listings.length);
+      setUserListings(listings);
     }
   }, []);
 
@@ -44,6 +45,18 @@ export default function Profile() {
     setUser(null);
     toast.success("Signed out successfully");
     navigate("/");
+  };
+
+  const handleDeleteListing = (id: string) => {
+    deleteListing(id);
+
+    const updatedListings = getAllListings().filter(
+      (l) => l.userId === user?.id,
+    );
+
+    setUserListings(updatedListings);
+
+    toast.success("Listing deleted");
   };
 
   if (!user) {
@@ -183,7 +196,7 @@ export default function Profile() {
                 </div>
                 <div>
                   <span className="text-muted-foreground">{t("listings")}</span>
-                  <p>{userListings}</p>
+                  <p>{userListings.length}</p>
                 </div>
               </div>
             </div>
@@ -229,6 +242,80 @@ export default function Profile() {
               {t("createNewListing")}
             </p>
           </button>
+        </motion.div>
+
+        {/* My Listings */}
+        <motion.div
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="mb-8"
+        >
+          <h2
+            className="text-3xl mb-6"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            {t("myListings")}
+          </h2>
+
+          {userListings.length === 0 ? (
+            <p className="text-muted-foreground">{t("noListingsYet")}</p>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {userListings.map((listing) => (
+                <div
+                  key={listing.id}
+                  className="relative cursor-pointer rounded-xl border border-border overflow-hidden"
+                  onClick={() => navigate(`/car/${listing.id}`)}
+                >
+                  <img
+                    src={listing.images[0]}
+                    className="w-full h-48 object-cover"
+                  />
+
+                  {/* ACTION BUTTONS */}
+                  <div className="absolute top-2 right-2 flex space-x-2">
+                    {/* EDIT */}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/sell?id=${listing.id}`);
+                      }}
+                      className="px-3 py-1 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600"
+                    >
+                      Edit
+                    </button>
+
+                    {/* DELETE */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteListing(listing.id);
+                      }}
+                      className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
+                    >
+                      Delete
+                    </button>
+                  </div>
+
+                  <div className="p-4">
+                    <h3 className="font-semibold">
+                      {listing.brand} {listing.model}
+                    </h3>
+
+                    <p className="text-sm text-muted-foreground">
+                      {listing.year} • {listing.mileage} miles
+                    </p>
+
+                    <p className="text-[var(--gold)] font-bold">
+                      ${listing.price.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         {/* Admin Access */}

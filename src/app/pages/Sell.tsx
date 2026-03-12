@@ -6,6 +6,8 @@ import { Upload, X, CheckCircle } from "lucide-react";
 import { getCurrentUser, signInWithGoogle } from "../../utils/auth";
 import { createListing } from "../../utils/storage";
 import { toast } from "sonner";
+import { useSearchParams } from "react-router";
+import { getListingById, updateListing } from "../../utils/storage";
 
 export default function Sell() {
   const { t } = useTranslation();
@@ -14,6 +16,8 @@ export default function Sell() {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagePreview, setImagePreview] = useState<string[]>([]);
+  const [searchParams] = useSearchParams();
+  const listingId = searchParams.get("id");
 
   const [formData, setFormData] = useState({
     brand: "",
@@ -92,22 +96,60 @@ export default function Sell() {
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      const listing = createListing({
-        userId: user.id,
-        ...formData,
-        images: imagePreview,
-        featured: false,
-        status: "approved", // Auto-approve for demo purposes
-      });
+      if (listingId) {
+        updateListing(listingId, {
+          ...formData,
+          images: imagePreview,
+        });
+
+        toast.success("Listing updated!");
+        navigate(`/car/${listingId}`);
+      } else {
+        const listing = createListing({
+          userId: user.id,
+          ...formData,
+          images: imagePreview,
+          featured: false,
+          status: "approved",
+        });
+
+        toast.success("Listing published!");
+        navigate(`/car/${listing.id}`);
+      }
 
       toast.success("Listing published successfully!");
-      navigate(`/car/${listing.id}`);
+      navigate(`/car/${listingId}`);
     } catch (error) {
       toast.error("Failed to create listing");
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    if (listingId) {
+      const listing = getListingById(listingId);
+
+      if (listing) {
+        setFormData({
+          brand: listing.brand,
+          model: listing.model,
+          year: listing.year,
+          mileage: listing.mileage,
+          price: listing.price,
+          engineType: listing.engineType,
+          transmission: listing.transmission,
+          exteriorColor: listing.exteriorColor,
+          interiorColor: listing.interiorColor,
+          description: listing.description,
+          location: listing.location,
+          contactDetails: listing.contactDetails,
+        });
+
+        setImagePreview(listing.images);
+      }
+    }
+  }, [listingId]);
 
   if (!user) {
     return (
@@ -178,7 +220,7 @@ export default function Sell() {
             className="text-4xl md:text-5xl mb-4"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
-            {t("createListing")}
+            {listingId ? "Edit Listing" : "Create Listing"}
           </h1>
           <p className="text-xl text-muted-foreground">{t("sellSubtitle")}</p>
         </motion.div>
@@ -248,14 +290,14 @@ export default function Sell() {
                 <input
                   type="number"
                   required
-                  min="0"
                   value={formData.mileage}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      mileage: parseInt(e.target.value),
+                      mileage: parseInt(e.target.value) || 0,
                     })
                   }
+                  placeholder="0"
                   className="w-full px-4 py-3 rounded-lg border border-border bg-background focus:border-[var(--gold)] focus:outline-none transition-colors duration-300"
                 />
               </div>
@@ -321,6 +363,7 @@ export default function Sell() {
                   onChange={(e) =>
                     setFormData({ ...formData, exteriorColor: e.target.value })
                   }
+                  placeholder={t("salonColorPlaceholder")}
                   className="w-full px-4 py-3 rounded-lg border border-border bg-background focus:border-[var(--gold)] focus:outline-none transition-colors duration-300"
                 />
               </div>
@@ -334,6 +377,7 @@ export default function Sell() {
                   onChange={(e) =>
                     setFormData({ ...formData, interiorColor: e.target.value })
                   }
+                  placeholder={t("colorPlaceholder")}
                   className="w-full px-4 py-3 rounded-lg border border-border bg-background focus:border-[var(--gold)] focus:outline-none transition-colors duration-300"
                 />
               </div>

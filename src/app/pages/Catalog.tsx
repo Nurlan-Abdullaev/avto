@@ -24,6 +24,7 @@ export default function Catalog() {
   const [showFilters, setShowFilters] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [user] = useState(() => getCurrentUser());
+  const [price, setPrice] = useState("");
 
   useEffect(() => {
     const cars = getApprovedListings();
@@ -48,12 +49,17 @@ export default function Catalog() {
 
     // Search filter
     if (searchTerm) {
-      filtered = filtered.filter(
-        (car) =>
-          car.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          car.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          car.description.toLowerCase().includes(searchTerm.toLowerCase()),
-      );
+      const term = searchTerm.toLowerCase();
+
+      filtered = filtered.filter((car) => {
+        const brand = car.brand.toLowerCase();
+        const model = car.model.toLowerCase();
+        const desc = car.description.toLowerCase();
+
+        return (
+          brand.includes(term) || model.includes(term) || desc.includes(term)
+        );
+      });
     }
 
     // Brand filter

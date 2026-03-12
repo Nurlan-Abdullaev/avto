@@ -79,6 +79,8 @@ const resources = {
       uploadOneImage: "Загрузите хотя бы одно изображение",
       listingPublished: "Объявление успешно опубликовано!",
       listingFailed: "Ошибка создания объявления",
+      colorPlaceholder: "Цвет",
+      salonColorPlaceholder: "Цвет салона",
 
       // Buy Flow
       luxuryCatalog: "Каталог люкс",
@@ -271,6 +273,8 @@ const resources = {
       uploadOneImage: "Please upload at least one image",
       listingPublished: "Listing published successfully!",
       listingFailed: "Failed to create listing",
+      colorPlaceholder: "Exterior color",
+      salonColorPlaceholder: "Interior color",
 
       // Buy Flow
       luxuryCatalog: "Luxury Catalog",
@@ -461,6 +465,8 @@ const resources = {
       uploadOneImage: "Кеминде бир сүрөт жүктөңүз",
       listingPublished: "Жарыя ийгиликтүү жарыяланды!",
       listingFailed: "Жарыя түзүүдө ката кетти",
+      colorPlaceholder: "Тышкы түс",
+      salonColorPlaceholder: "Салондун түсү",
 
       // Buy Flow
       luxuryCatalog: "Люкс каталог",
