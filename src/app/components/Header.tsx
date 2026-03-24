@@ -56,7 +56,6 @@ export default function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-background/80 border-b border-[var(--gold)]/20">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* Logo */}
           <Link to="/" className="flex items-center space-x-3 group">
             <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center transform group-hover:scale-105 transition-transform duration-300">
               <span className="text-2xl font-bold text-white">LA</span>
@@ -74,7 +73,6 @@ export default function Header() {
               </div>
             </div>
           </Link>
-
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8">
             {navLinks.map((link) => (
@@ -98,7 +96,6 @@ export default function Header() {
               </Link>
             ))}
           </nav>
-
           {/* Right Side Actions */}
           <div className="flex items-center space-x-2 lg:space-x-4">
             {/* Language Switcher */}
