@@ -33,6 +33,7 @@ export default function CarDetails() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFav, setIsFav] = useState(false);
   const user = getCurrentUser();
+  const [showContactModal, setShowContactModal] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -79,7 +80,8 @@ export default function CarDetails() {
       navigate("/profile");
       return;
     }
-    toast.success("Contact information revealed");
+
+    setShowContactModal(true);
   };
 
   if (!car) {
@@ -316,22 +318,19 @@ export default function CarDetails() {
               </h3>
 
               <div className="space-y-4">
+                //
                 <button
                   onClick={handleContact}
-                  className="w-full px-6 py-4 rounded-lg bg-gradient-to-r from-[var(--gold)] to-[var(--gold-dark)] text-white hover:shadow-2xl hover:shadow-[var(--gold)]/30 transition-all duration-300 flex items-center justify-center space-x-2"
+                  className="w-full px-6 py-4 rounded-lg bg-gradient-to-r from-[var(--gold)] to-[var(--gold-dark)] text-white flex items-center justify-center space-x-2"
                 >
                   <Phone className="w-5 h-5" />
                   <span>{t("contactSeller")}</span>
                 </button>
-
-                <button
-                  onClick={handleContact}
-                  className="w-full px-6 py-4 rounded-lg border border-[var(--gold)] text-[var(--gold)] hover:bg-[var(--gold)]/10 transition-all duration-300 flex items-center justify-center space-x-2"
-                >
+                <button className="w-full px-6 py-4 rounded-lg border border-[var(--gold)] text-[var(--gold)] hover:bg-[var(--gold)]/10 transition-all duration-300 flex items-center justify-center space-x-2">
                   <MessageCircle className="w-5 h-5" />
                   <span>{t("scheduleViewing")}</span>
                 </button>
-
+                //
                 {user && (
                   <div className="pt-4 border-t border-border">
                     <p className="text-sm text-muted-foreground mb-2">
@@ -348,6 +347,55 @@ export default function CarDetails() {
           </motion.div>
         </div>
       </div>
+      {showContactModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-background rounded-2xl p-6 w-full max-w-md border border-[var(--gold)]/20">
+            <h2 className="text-2xl mb-4 text-center">{t("sellerContact")}</h2>
+
+            <div className="space-y-4">
+              {/* Phone */}
+              <a
+                href={`tel:${car.contactDetails}`}
+                onClick={() => setShowContactModal(false)}
+                className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg bg-[var(--gold)] text-white"
+              >
+                <Phone className="w-5 h-5" />
+                <span>Call</span>
+              </a>
+
+              {/* WhatsApp */}
+              <a
+                href={`https://wa.me/${car.contactDetails}`}
+                target="_blank"
+                onClick={() => setShowContactModal(false)}
+                className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg border border-[var(--gold)] text-[var(--gold)]"
+              >
+                <MessageCircle className="w-5 h-5" />
+                <span>WhatsApp</span>
+              </a>
+
+              {/* Telegram */}
+              <a
+                href={`https://t.me/${car.contactDetails}`}
+                target="_blank"
+                onClick={() => setShowContactModal(false)}
+                className="flex items-center justify-center space-x-2 w-full px-4 py-3 rounded-lg border border-[var(--gold)] text-[var(--gold)]"
+              >
+                <MessageCircle className="w-5 h-5" />
+                <span>Telegram</span>
+              </a>
+            </div>
+
+            {/* Close */}
+            <button
+              onClick={() => setShowContactModal(false)}
+              className="mt-6 w-full py-2 text-muted-foreground hover:text-white"
+            >
+              {t("close")}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

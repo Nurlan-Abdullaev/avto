@@ -39,11 +39,13 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  
+
   /* Luxury Theme Colors */
-  --gold: #D4AF37;
-  --gold-light: #F4E4C1;
-  --gold-dark: #B8960F;
+  --gold: #c6a756;
+  --gold-light: #f7edd1;
+  --gold-dark: #5a460f;
+  --gold-accent: #e2c673;
+  --gold-shadow: #2c2307;
 }
 
 .dark {
@@ -81,11 +83,13 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
-  
+
   /* Luxury Theme Colors for Dark Mode */
-  --gold: #D4AF37;
-  --gold-light: #F4E4C1;
-  --gold-dark: #B8960F;
+  --gold: #c6a756;
+  --gold-light: #f7edd1;
+  --gold-dark: #5a460f;
+  --gold-accent: #e2c673;
+  --gold-shadow: #2c2307;
 }
 
 @theme inline {

@@ -282,7 +282,7 @@ export default function Profile() {
                         e.stopPropagation();
                         navigate(`/sell?id=${listing.id}`);
                       }}
-                      className="px-3 py-1 rounded-lg bg-yellow-500 text-white hover:bg-yellow-600"
+                      className="w-17 h-10 rounded-2xl bg-gradient-to-br from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center"
                     >
                       Edit
                     </button>
@@ -293,7 +293,7 @@ export default function Profile() {
                         e.stopPropagation();
                         handleDeleteListing(listing.id);
                       }}
-                      className="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600"
+                      className="w-17 h-10 rounded-2xl bg-gradient-to-br from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center"
                     >
                       Delete
                     </button>

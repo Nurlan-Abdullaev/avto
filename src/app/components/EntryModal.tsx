@@ -56,11 +56,7 @@ export default function EntryModal({ onClose }: EntryModalProps) {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
               className="inline-block mb-4"
-            >
-              {/* <div className="w-20 h-5 mx-auto rounded-2xl bg-gradient-to-br from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center">
-                <span className="text-2xl font-bold text-white">LA</span>
-              </div> */}
-            </motion.div>
+            ></motion.div>
 
             <motion.h1
               initial={{ y: -20, opacity: 0 }}
