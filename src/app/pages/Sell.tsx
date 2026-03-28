@@ -126,6 +126,21 @@ export default function Sell() {
     }
   };
 
+  const engineOptions = [
+    "petrol",
+    "diesel",
+    "hybrid",
+    "electric",
+    "v6",
+    "v8",
+    "v12",
+    "inline4",
+    "inline6",
+    "turbo",
+    "biturbo",
+    "rotary",
+  ];
+
   useEffect(() => {
     if (listingId) {
       const listing = getListingById(listingId);
@@ -244,30 +259,77 @@ export default function Sell() {
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block mb-2">{t("carBrand")} *</label>
-                <input
-                  type="text"
+                <select
                   required
                   value={formData.brand}
                   onChange={(e) =>
                     setFormData({ ...formData, brand: e.target.value })
                   }
-                  className="w-full px-4 py-3 rounded-lg border border-border bg-background focus:border-[var(--gold)] focus:outline-none transition-colors duration-300"
-                  placeholder={t("brandExample")}
-                />
+                  className="w-full px-4 py-3 rounded-lg border border-border bg-background focus:border-[var(--gold)]"
+                >
+                  <option value="">Выберите марку</option>
+                  <option>Mercedes-Benz</option>
+                  <option>BMW</option>
+                  <option>Audi</option>
+                  <option>Lexus</option>
+                  <option>Porsche</option>
+                  <option>Toyota</option>
+                  <option>Honda</option>
+                  <option>Nissan</option>
+                  <option>Mazda</option>
+                  <option>Mitsubishi</option>
+                  <option>Subaru</option>
+                  <option>Hyundai</option>
+                  <option>Kia</option>
+                  <option>Genesis</option>
+                  <option>Volkswagen</option>
+                  <option>Skoda</option>
+                  <option>SEAT</option>
+                  <option>Ford</option>
+                  <option>Chevrolet</option>
+                  <option>Cadillac</option>
+                  <option>Renault</option>
+                  <option>Peugeot</option>
+                  <option>Citroen</option>
+                  <option>Geely</option>
+                  <option>Changan</option>
+                  <option>Haval</option>
+                  <option>Chery</option>
+                  <option>Exeed</option>
+                  <option>Lada</option>
+                  <option>UAZ</option>
+                  <option>GAZ</option>
+                  <option>Infiniti</option>
+                  <option>Acura</option>
+                  <option>Volvo</option>
+                  <option>Land Rover</option>
+                  <option>Jaguar</option>
+                  <option>Tesla</option>
+                </select>
               </div>
 
               <div>
                 <label className="block mb-2">{t("model")} *</label>
-                <input
-                  type="text"
+                <select
                   required
                   value={formData.model}
                   onChange={(e) =>
                     setFormData({ ...formData, model: e.target.value })
                   }
-                  className="w-full px-4 py-3 rounded-lg border border-border bg-background focus:border-[var(--gold)] focus:outline-none transition-colors duration-300"
-                  placeholder={t("modelExample")}
-                />
+                  className="w-full px-4 py-3 rounded-lg border border-border bg-background"
+                >
+                  <option value="">Тип кузова</option>
+                  <option>Седан</option>
+                  <option>Хэтчбек</option>
+                  <option>Универсал</option>
+                  <option>Кроссовер</option>
+                  <option>Внедорожник</option>
+                  <option>Купе</option>
+                  <option>Кабриолет</option>
+                  <option>Пикап</option>
+                  <option>Минивэн</option>
+                  <option>Лифтбек</option>
+                </select>
               </div>
 
               <div>
@@ -324,16 +386,28 @@ export default function Sell() {
 
               <div>
                 <label className="block mb-2">{t("engineType")} *</label>
-                <input
-                  type="text"
+                <select
                   required
                   value={formData.engineType}
                   onChange={(e) =>
                     setFormData({ ...formData, engineType: e.target.value })
                   }
                   className="w-full px-4 py-3 rounded-lg border border-border bg-background focus:border-[var(--gold)] focus:outline-none transition-colors duration-300"
-                  placeholder="e.g., V12 Twin-Turbo"
-                />
+                >
+                  <option value="">{t("engineType")}</option>
+                  <option value="petrol">{t("engineTypes.petrol")}</option>
+                  <option value="diesel">{t("engineTypes.diesel")}</option>
+                  <option value="hybrid">{t("engineTypes.hybrid")}</option>
+                  <option value="electric">{t("engineTypes.electric")}</option>
+                  <option value="v6">V6</option>
+                  <option value="v8">V8</option>
+                  <option value="v12">V12</option>
+                  <option value="inline4">{t("engineTypes.inline4")}</option>
+                  <option value="inline6">{t("engineTypes.inline6")}</option>
+                  <option value="turbo">{t("engineTypes.turbo")}</option>
+                  <option value="biturbo">{t("engineTypes.biturbo")}</option>
+                  <option value="rotary">{t("engineTypes.rotary")}</option>
+                </select>
               </div>
 
               <div>
@@ -356,44 +430,84 @@ export default function Sell() {
 
               <div>
                 <label className="block mb-2">{t("exteriorColor")} *</label>
-                <input
-                  type="text"
+                <select
                   required
                   value={formData.exteriorColor}
                   onChange={(e) =>
                     setFormData({ ...formData, exteriorColor: e.target.value })
                   }
-                  placeholder={t("salonColorPlaceholder")}
-                  className="w-full px-4 py-3 rounded-lg border border-border bg-background focus:border-[var(--gold)] focus:outline-none transition-colors duration-300"
-                />
+                  className="w-full px-4 py-3 rounded-lg border border-border bg-background"
+                >
+                  <option value="">Цвет кузова</option>
+                  <option>⚫ Чёрный</option>
+                  <option>⚪ Белый</option>
+                  <option>⚙️ Серебристый металлик</option>
+                  <option>🌫 Мокрый асфальт</option>
+                  <option>🪨 Графит</option>
+                  <option>✨ Перламутровый белый</option>
+                  <option>🔵 Синий металлик</option>
+                  <option>🌊 Глубокий синий</option>
+                  <option>🔴 Красный металлик</option>
+                  <option>🍷 Бордовый металлик</option>
+                  <option>🍒 Вишнёвый</option>
+                  <option>🟢 Зелёный металлик</option>
+                  <option>🌿 Хаки</option>
+                  <option>🏜 Песочный</option>
+                  <option>🟡 Жёлтый</option>
+                  <option>🟠 Оранжевый металлик</option>
+                  <option>✨ Золотистый</option>
+                </select>
               </div>
 
               <div>
                 <label className="block mb-2">{t("interiorColor")} *</label>
-                <input
-                  type="text"
+                <select
                   required
                   value={formData.interiorColor}
                   onChange={(e) =>
                     setFormData({ ...formData, interiorColor: e.target.value })
                   }
-                  placeholder={t("colorPlaceholder")}
-                  className="w-full px-4 py-3 rounded-lg border border-border bg-background focus:border-[var(--gold)] focus:outline-none transition-colors duration-300"
-                />
+                  className="w-full px-4 py-3 rounded-lg border border-border bg-background"
+                >
+                  <option value="">Цвет салона</option>
+                  <option>⚫ Чёрный</option>
+                  <option>⚪ Белый</option>
+                  <option>🟤 Коричневый</option>
+                  <option>☕ Кофейный</option>
+                  <option>🤍 Бежевый</option>
+                  <option>🍦 Кремовый</option>
+                  <option>🌫 Серый</option>
+                  <option>⬜ Светло-серый</option>
+                  <option>🟥 Красный (спорт)</option>
+                  <option>🍷 Бордовый</option>
+                  <option>⚫⚪ Чёрно-белый</option>
+                  <option>🎨 Комбинированный</option>
+                  <option>🪶 Алькантара</option>
+                  <option>💺 Кожа (чёрная)</option>
+                  <option>💺 Кожа (бежевая)</option>
+                </select>
               </div>
 
               <div>
                 <label className="block mb-2">{t("location")} *</label>
-                <input
-                  type="text"
+                <select
                   required
                   value={formData.location}
                   onChange={(e) =>
                     setFormData({ ...formData, location: e.target.value })
                   }
-                  className="w-full px-4 py-3 rounded-lg border border-border bg-background focus:border-[var(--gold)] focus:outline-none transition-colors duration-300"
-                  placeholder={t("cityCountry")}
-                />
+                  className="w-full px-4 py-3 rounded-lg border border-border bg-background"
+                >
+                  <option value="">Выберите область</option>
+                  <option>Бишкек</option>
+                  <option>Чуйская</option>
+                  <option>Ош</option>
+                  <option>Джалал-Абадская</option>
+                  <option>Нарынская</option>
+                  <option>Иссык-Кульская</option>
+                  <option>Таласская</option>
+                  <option>Баткенская</option>
+                </select>
               </div>
             </div>
 
