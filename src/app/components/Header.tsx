@@ -4,7 +4,6 @@ import { Moon, Sun, Globe, User, Heart, Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getCurrentUser, signOut } from "../../utils/auth";
 import { motion, AnimatePresence } from "framer-motion";
-// import la from "../assets/LA.png";
 
 export default function Header() {
   const { t, i18n } = useTranslation();
