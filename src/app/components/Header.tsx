@@ -4,6 +4,7 @@ import { Moon, Sun, Globe, User, Heart, Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getCurrentUser, signOut } from "../../utils/auth";
 import { motion, AnimatePresence } from "framer-motion";
+import LA from "../assets/LA.png";
 
 export default function Header() {
   const { t, i18n } = useTranslation();
@@ -56,10 +57,10 @@ export default function Header() {
       <div className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <Link to="/" className="flex items-center space-x-3 group">
-            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center transform group-hover:scale-105 transition-transform duration-300">
-              <span className="text-2xl font-bold text-white">LA</span>
-              {/* <img className="w-20 h-20" src={la} alt="" /> */}
-            </div>
+            {/* <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center transform group-hover:scale-105 transition-transform duration-300"> */}
+            {/* <span className="text-2xl font-bold text-white">LA</span> */}
+            <img className="w-20 h-20" src={LA} alt="LA" />
+            {/* </div> */}
             <div className="hidden md:block">
               <div
                 className="text-xl font-bold tracking-tight"

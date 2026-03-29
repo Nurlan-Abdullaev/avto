@@ -269,8 +269,9 @@ export default function Profile() {
                   onClick={() => navigate(`/car/${listing.id}`)}
                 >
                   <img
-                    src={listing.images[0]}
+                    src={listing.images?.[0] ?? "/placeholder.jpg"}
                     className="w-full h-48 object-cover"
+                    alt={`${listing.brand} ${listing.model}`}
                   />
 
                   {/* ACTION BUTTONS */}

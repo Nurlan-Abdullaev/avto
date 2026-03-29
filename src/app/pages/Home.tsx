@@ -10,6 +10,25 @@ export default function Home() {
   const { t } = useTranslation();
   const [showEntryModal, setShowEntryModal] = useState(false);
   const [featuredCars, setFeaturedCars] = useState<CarListing[]>([]);
+  const [current, setCurrent] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const goTo = (index: number) => {
+    setDirection(index > current ? 1 : -1);
+    setCurrent(index);
+  };
+  const cards = [
+    {
+      icon: Star,
+      titleKey: "curatedExcellence",
+      descKey: "verifiedAuthenticityDesc",
+    },
+    {
+      icon: Shield,
+      titleKey: "verifiedAuthenticity",
+      descKey: "verifiedAuthenticityDesc",
+    },
+    { icon: Award, titleKey: "eliteService", descKey: "eliteServiceDesc" },
+  ];
 
   useEffect(() => {
     const hasVisited = localStorage.getItem("elite_motors_visited");
@@ -110,69 +129,87 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
+      {/* Features Section */}
       <section className="py-24 bg-secondary/30">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-3 gap-8">
-            <motion.div
-              initial={{ y: 50, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="p-8 rounded-2xl bg-gradient-to-br from-background to-secondary/50 border border-[var(--gold)]/20 hover:border-[var(--gold)]/50 transition-colors duration-300"
-            >
-              <div className="w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center">
-                <Star className="w-8 h-8 text-white" />
-              </div>
-              <h3
-                className="text-2xl mb-4"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                {t("curatedExcellence")}
-              </h3>
-              <p className="text-muted-foreground">
-                {t("verifiedAuthenticityDesc")}
-              </p>
-            </motion.div>
+          {/* Desktop */}
+          <div className="hidden md:grid md:grid-cols-3 gap-8">
+            {cards.map((card, i) => {
+              const Icon = card.icon;
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ y: 50, opacity: 0 }}
+                  whileInView={{ y: 0, opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="p-8 rounded-2xl bg-gradient-to-br from-background to-secondary/50 border border-[var(--gold)]/20 hover:border-[var(--gold)]/50 transition-colors duration-300"
+                >
+                  <div className="w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center">
+                    <Icon className="w-8 h-8 text-white" />
+                  </div>
+                  <h3
+                    className="text-2xl mb-4"
+                    style={{ fontFamily: "'Playfair Display', serif" }}
+                  >
+                    {t(card.titleKey)}
+                  </h3>
+                  <p className="text-muted-foreground">{t(card.descKey)}</p>
+                </motion.div>
+              );
+            })}
+          </div>
 
-            <motion.div
-              initial={{ y: 50, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="p-8 rounded-2xl bg-gradient-to-br from-background to-secondary/50 border border-[var(--gold)]/20 hover:border-[var(--gold)]/50 transition-colors duration-300"
-            >
-              <div className="w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center">
-                <Shield className="w-8 h-8 text-white" />
-              </div>
-              <h3
-                className="text-2xl mb-4"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                {t("verifiedAuthenticity")}
-              </h3>
-              <p className="text-muted-foreground">
-                {t("verifiedAuthenticityDesc")}
-              </p>
-            </motion.div>
+          {/* Mobile карусель */}
+          <div className="md:hidden">
+            <div className="relative overflow-hidden">
+              <AnimatePresence custom={direction} mode="wait">
+                <motion.div
+                  key={current}
+                  custom={direction}
+                  initial={{ x: direction > 0 ? 300 : -300, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: direction > 0 ? -300 : 300, opacity: 0 }}
+                  transition={{ duration: 0.35, ease: "easeInOut" }}
+                  className="p-8 rounded-2xl bg-gradient-to-br from-background to-secondary/50 border border-[var(--gold)]/20"
+                >
+                  {(() => {
+                    const Icon = cards[current].icon;
+                    return (
+                      <>
+                        <div className="w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center">
+                          <Icon className="w-8 h-8 text-white" />
+                        </div>
+                        <h3
+                          className="text-2xl mb-4"
+                          style={{ fontFamily: "'Playfair Display', serif" }}
+                        >
+                          {t(cards[current].titleKey)}
+                        </h3>
+                        <p className="text-muted-foreground">
+                          {t(cards[current].descKey)}
+                        </p>
+                      </>
+                    );
+                  })()}
+                </motion.div>
+              </AnimatePresence>
+            </div>
 
-            <motion.div
-              initial={{ y: 50, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              className="p-8 rounded-2xl bg-gradient-to-br from-background to-secondary/50 border border-[var(--gold)]/20 hover:border-[var(--gold)]/50 transition-colors duration-300"
-            >
-              <div className="w-16 h-16 mb-6 rounded-2xl bg-gradient-to-br from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center">
-                <Award className="w-8 h-8 text-white" />
-              </div>
-              <h3
-                className="text-2xl mb-4"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                {t("eliteService")}
-              </h3>
-              <p className="text-muted-foreground">{t("eliteServiceDesc")}</p>
-            </motion.div>
+            {/* Dots */}
+            <div className="flex justify-center gap-2 mt-6">
+              {cards.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => goTo(i)}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    i === current
+                      ? "bg-[var(--gold)] w-4"
+                      : "bg-muted-foreground/40 w-2"
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -209,40 +246,151 @@ export default function Home() {
                 >
                   <Link
                     to={`/car/${car.id}`}
-                    className="group block rounded-2xl overflow-hidden border border-[var(--gold)]/20 hover:border-[var(--gold)] transition-all duration-500 hover:shadow-2xl hover:shadow-[var(--gold)]/20"
+                    className="group block rounded-2xl overflow-hidden border border-border bg-white dark:bg-background hover:shadow-xl transition-all duration-300 relative"
                   >
-                    <div className="relative h-64 overflow-hidden bg-secondary">
+                    {/* Image */}
+                    <div className="relative h-56 overflow-hidden bg-secondary">
                       <img
                         src={car.images[0]}
                         alt={`${car.brand} ${car.model}`}
-                        className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                        className="w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                      {/* Rating badge */}
+                      <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded-xl px-3 py-1.5">
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="white"
+                        >
+                          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                        </svg>
+                        <span className="text-sm font-semibold text-white">
+                          107
+                        </span>
+                      </div>
 
-                      <div className="absolute top-4 right-4 px-4 py-2 rounded-lg bg-[var(--gold)] text-white text-sm font-bold">
+                      <div className="absolute top-3 left-3 px-3 py-1 rounded-lg bg-[var(--gold)] text-white text-xs font-bold">
                         {t("featured")}
                       </div>
                     </div>
 
-                    <div className="p-6 bg-gradient-to-br from-background to-secondary/30">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3
-                          className="text-2xl"
-                          style={{ fontFamily: "'Playfair Display', serif" }}
+                    {/* Content */}
+                    <div className="p-5">
+                      <h3
+                        className="text-xl font-bold text-gray-900 dark:text-white mb-1"
+                        style={{ fontFamily: "'Playfair Display', serif" }}
+                      >
+                        {car.brand} {car.model}
+                      </h3>
+
+                      <div className="flex items-center gap-1 text-gray-400 text-sm mb-4">
+                        <svg
+                          width="12"
+                          height="14"
+                          viewBox="0 0 12 14"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
                         >
-                          {car.brand}
-                        </h3>
-                        <span className="text-[var(--gold)]">
-                          ${car.price.toLocaleString()}
-                        </span>
+                          <path d="M6 1C3.8 1 2 2.8 2 5c0 3 4 8 4 8s4-5 4-8c0-2.2-1.8-4-4-4z" />
+                          <circle
+                            cx="6"
+                            cy="5"
+                            r="1.2"
+                            fill="currentColor"
+                            stroke="none"
+                          />
+                        </svg>
+                        <span>Bishkek, KG</span>
                       </div>
 
-                      <p className="text-muted-foreground mb-4">{car.model}</p>
+                      <hr className="border-gray-100 dark:border-border mb-4" />
 
-                      <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <span>{car.year}</span>
-                        <span>{car.mileage.toLocaleString()} mi</span>
-                        <span>{car.transmission}</span>
+                      <div className="grid grid-cols-2 gap-3 mb-5">
+                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-muted-foreground">
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                          >
+                            <circle cx="8" cy="8" r="6.5" />
+                            <path d="M8 4v4l3 2" />
+                            <path d="M4.5 4.5 l1.5 1.5" strokeLinecap="round" />
+                          </svg>
+                          <span>{car.mileage.toLocaleString()} mi</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-muted-foreground">
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                          >
+                            <circle cx="4" cy="4" r="2" />
+                            <circle cx="12" cy="4" r="2" />
+                            <circle cx="8" cy="12" r="2" />
+                            <path
+                              d="M4 6v4M12 6v4M8 10V8M4 10h8"
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                          <span>{car.transmission}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-muted-foreground">
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                          >
+                            <rect x="2" y="3" width="8" height="11" rx="1.5" />
+                            <path
+                              d="M10 7h1.5a1.5 1.5 0 0 1 1.5 1.5v2a1 1 0 0 0 2 0V6l-2-2"
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                          <span>Petrol</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-muted-foreground">
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 16 16"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                          >
+                            <rect x="1" y="3" width="14" height="11" rx="1.5" />
+                            <path
+                              d="M1 7h14M5 3V1M11 3V1"
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                          <span>{car.year}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="text-xs text-gray-400">From </span>
+                          <span className="text-xl font-bold text-gray-900 dark:text-white">
+                            ${car.price.toLocaleString()}
+                          </span>
+                        </div>
+                        <button
+                          onClick={(e) => e.preventDefault()}
+                          className="px-5 py-2 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-semibold hover:opacity-80 transition-opacity"
+                        >
+                          View Car
+                        </button>
                       </div>
                     </div>
                   </Link>
@@ -272,10 +420,18 @@ export default function Home() {
       <section className="py-24 bg-gradient-to-br from-secondary/50 to-background">
         <div className="container mx-auto px-4">
           <motion.div
-            initial={{ y: 50, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
+            initial="hidden"
+            whileInView="visible"
             viewport={{ once: true }}
-            className="max-w-4xl mx-auto text-center"
+            variants={{
+              hidden: {},
+              visible: {
+                transition: {
+                  staggerChildren: 0.15,
+                },
+              },
+            }}
+            className="grid md:grid-cols-3 gap-8"
           >
             <h2
               className="text-4xl md:text-5xl mb-6"

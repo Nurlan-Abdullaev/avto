@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { Search, SlidersHorizontal, Heart, X } from "lucide-react";
+import { Search, SlidersHorizontal, Heart } from "lucide-react";
 import {
   getApprovedListings,
   CarListing,
@@ -24,7 +24,6 @@ export default function Catalog() {
   const [showFilters, setShowFilters] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [user] = useState(() => getCurrentUser());
-  const [price, setPrice] = useState("");
 
   useEffect(() => {
     const cars = getApprovedListings();
@@ -47,7 +46,6 @@ export default function Catalog() {
   useEffect(() => {
     let filtered = listings;
 
-    // Search filter
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
 
@@ -62,17 +60,14 @@ export default function Catalog() {
       });
     }
 
-    // Brand filter
     if (selectedBrand) {
       filtered = filtered.filter((car) => car.brand === selectedBrand);
     }
 
-    // Price filter
     filtered = filtered.filter(
       (car) => car.price >= priceRange[0] && car.price <= priceRange[1],
     );
 
-    // Year filter
     filtered = filtered.filter(
       (car) => car.year >= yearRange[0] && car.year <= yearRange[1],
     );
@@ -128,7 +123,6 @@ export default function Catalog() {
           transition={{ delay: 0.1 }}
           className="mb-8 space-y-4"
         >
-          {/* Search Bar */}
           <div className="flex gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -282,58 +276,181 @@ export default function Catalog() {
               >
                 <Link
                   to={`/car/${car.id}`}
-                  className="group block rounded-2xl overflow-hidden border border-[var(--gold)]/20 hover:border-[var(--gold)] transition-all duration-500 hover:shadow-2xl hover:shadow-[var(--gold)]/20 relative"
+                  className="group block rounded-2xl overflow-hidden border border-border bg-white dark:bg-background hover:shadow-xl transition-all duration-300 relative"
                 >
-                  {/* Favorite Button */}
-                  <button
-                    onClick={(e) => handleToggleFavorite(car.id, e)}
-                    className="absolute top-4 right-4 z-10 p-3 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 transition-colors duration-300"
-                  >
-                    <Heart
-                      className={`w-5 h-5 ${
-                        favorites.has(car.id)
-                          ? "fill-[var(--gold)] text-[var(--gold)]"
-                          : "text-white"
-                      }`}
-                    />
-                  </button>
-
-                  <div className="relative h-64 overflow-hidden bg-secondary">
+                  {/* Image */}
+                  <div className="relative h-56 overflow-hidden bg-secondary">
                     <img
-                      src={car.images[0]}
+                      src={car.images?.[0] ?? ""}
                       alt={`${car.brand} ${car.model}`}
-                      className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                      className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    {/* Rating badge */}
+                    <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded-xl px-3 py-1.5">
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="white"
+                      >
+                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12.5c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                      </svg>
+                      <span className="text-sm font-semibold text-white">
+                        107
+                      </span>
+                    </div>
 
                     {car.featured && (
-                      <div className="absolute top-4 left-4 px-4 py-2 rounded-lg bg-[var(--gold)] text-white text-sm font-bold">
+                      <div className="absolute top-3 left-3 px-3 py-1 rounded-lg bg-[var(--gold)] text-white text-xs font-bold">
                         {t("featured")}
                       </div>
                     )}
                   </div>
 
-                  <div className="p-6 bg-gradient-to-br from-background to-secondary/30">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3
-                        className="text-2xl"
-                        style={{ fontFamily: "'Playfair Display', serif" }}
+                  {/* Content */}
+                  <div className="p-5">
+                    {/* Title */}
+                    <h3
+                      className="text-xl font-bold text-gray-900 dark:text-white mb-1"
+                      style={{ fontFamily: "'Playfair Display', serif" }}
+                    >
+                      {car.brand} {car.model}
+                    </h3>
+
+                    {/* Location */}
+                    <div className="flex items-center gap-1 text-gray-400 text-sm mb-4">
+                      <svg
+                        width="12"
+                        height="14"
+                        viewBox="0 0 12 14"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
                       >
-                        {car.brand}
-                      </h3>
-                      <span className="text-[var(--gold)]">
-                        ${car.price.toLocaleString()}
-                      </span>
+                        <path d="M6 1C3.8 1 2 2.8 2 5c0 3 4 8 4 8s4-5 4-8c0-2.2-1.8-4-4-4z" />
+                        <circle
+                          cx="6"
+                          cy="5"
+                          r="1.2"
+                          fill="currentColor"
+                          stroke="none"
+                        />
+                      </svg>
+                      <span>Bishkek, KG</span>
                     </div>
 
-                    <p className="text-muted-foreground mb-4">{car.model}</p>
+                    <hr className="border-gray-100 dark:border-border mb-4" />
 
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <span>{car.year}</span>
-                      <span>{car.mileage.toLocaleString()} mi</span>
-                      <span>{car.transmission}</span>
+                    {/* Specs grid */}
+                    <div className="grid grid-cols-2 gap-3 mb-5">
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-muted-foreground">
+                        {/* Mileage icon */}
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                        >
+                          <circle cx="8" cy="8" r="6.5" />
+                          <path d="M8 4v4l3 2" />
+                          <path d="M4.5 4.5 l1.5 1.5" strokeLinecap="round" />
+                        </svg>
+                        <span>{car.mileage.toLocaleString()} mi</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-muted-foreground">
+                        {/* Transmission icon */}
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                        >
+                          <circle cx="4" cy="4" r="2" />
+                          <circle cx="12" cy="4" r="2" />
+                          <circle cx="8" cy="12" r="2" />
+                          <path
+                            d="M4 6v4M12 6v4M8 10V8M4 10h8"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        <span>{car.transmission}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-muted-foreground">
+                        {/* Fuel icon */}
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                        >
+                          <rect x="2" y="3" width="8" height="11" rx="1.5" />
+                          <path
+                            d="M10 7h1.5a1.5 1.5 0 0 1 1.5 1.5v2a1 1 0 0 0 2 0V6l-2-2"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        <span>Petrol</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-muted-foreground">
+                        {/* Year/seats icon */}
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                        >
+                          <rect x="1" y="3" width="14" height="11" rx="1.5" />
+                          <path
+                            d="M1 7h14M5 3V1M11 3V1"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        <span>{car.year}</span>
+                      </div>
+                    </div>
+
+                    {/* Price + Button */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-xs text-gray-400">From </span>
+                        <span className="text-xl font-bold text-gray-900 dark:text-white">
+                          ${car.price.toLocaleString()}
+                        </span>
+                      </div>
+
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          window.location.href = `/car/${car.id}`;
+                        }}
+                        className="px-5 py-2 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-semibold hover:opacity-80 transition-opacity"
+                      >
+                        View Car
+                      </button>
                     </div>
                   </div>
+
+                  {/* Favorite */}
+                  <button
+                    onClick={(e) => handleToggleFavorite(car.id, e)}
+                    className="absolute top-3 right-3 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors"
+                  >
+                    <Heart
+                      className={`w-4 h-4 ${
+                        favorites.has(car.id)
+                          ? "fill-[var(--gold)] text-[var(--gold)]"
+                          : "text-gray-500"
+                      }`}
+                    />
+                  </button>
                 </Link>
               </motion.div>
             ))}
