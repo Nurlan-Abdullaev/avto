@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router";
 import { useTranslation } from "react-i18next";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Heart,
   MapPin,
@@ -13,7 +13,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Phone,
-  Mail,
   MessageCircle,
 } from "lucide-react";
 import {
@@ -32,22 +31,27 @@ export default function CarDetails() {
   const [car, setCar] = useState<CarListing | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFav, setIsFav] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const user = getCurrentUser();
   const [showContactModal, setShowContactModal] = useState(false);
 
   useEffect(() => {
     if (!id) return;
-
     const listing = getListingById(id);
     if (!listing) return;
-
     setCar(listing);
-
     const currentUser = getCurrentUser();
-    if (currentUser) {
-      setIsFav(isFavorite(currentUser.id, id));
-    }
+    if (currentUser) setIsFav(isFavorite(currentUser.id, id));
   }, [id]);
+
+  // Auto-play: switch every 3s, pause on hover
+  useEffect(() => {
+    if (!car || car.images.length <= 1 || hovered) return;
+    const timer = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % car.images.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [car, hovered]);
 
   const handleToggleFavorite = () => {
     if (!user) {
@@ -55,24 +59,20 @@ export default function CarDetails() {
       return;
     }
     if (!id) return;
-
     toggleFavorite(user.id, id);
     setIsFav(!isFav);
     toast.success(isFav ? t("removeFromFavorites") : t("addToFavorites"));
   };
 
   const nextImage = () => {
-    if (car) {
-      setCurrentImageIndex((prev) => (prev + 1) % car.images.length);
-    }
+    if (car) setCurrentImageIndex((prev) => (prev + 1) % car.images.length);
   };
 
   const prevImage = () => {
-    if (car) {
+    if (car)
       setCurrentImageIndex(
         (prev) => (prev - 1 + car.images.length) % car.images.length,
       );
-    }
   };
 
   const handleContact = () => {
@@ -80,7 +80,6 @@ export default function CarDetails() {
       navigate("/profile");
       return;
     }
-
     setShowContactModal(true);
   };
 
@@ -122,26 +121,37 @@ export default function CarDetails() {
             animate={{ x: 0, opacity: 1 }}
             className="space-y-4"
           >
-            {/* Main Image */}
-            <div className="relative aspect-video rounded-2xl overflow-hidden bg-secondary group">
-              <img
-                src={car.images[currentImageIndex]}
-                alt={`${car.brand} ${car.model}`}
-                className="w-full h-full object-cover"
-              />
+            {/* Main Image with AnimatePresence */}
+            <div
+              className="relative aspect-video rounded-2xl overflow-hidden bg-secondary group"
+              onMouseEnter={() => setHovered(true)}
+              onMouseLeave={() => setHovered(false)}
+            >
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.img
+                  key={currentImageIndex}
+                  src={car.images[currentImageIndex]}
+                  alt={`${car.brand} ${car.model}`}
+                  className="absolute inset-0 w-full h-full object-cover"
+                  initial={{ opacity: 0, x: 60, scale: 1.04 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: -60, scale: 0.97 }}
+                  transition={{ duration: 0.45, ease: [0.4, 0, 0.2, 1] }}
+                />
+              </AnimatePresence>
 
               {/* Navigation Arrows */}
               {car.images.length > 1 && (
                 <>
                   <button
                     onClick={prevImage}
-                    className="absolute left-4 top-1/2 transform -translate-y-1/2 p-3 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 transition-all duration-300 opacity-0 group-hover:opacity-100"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 transition-all duration-300 opacity-0 group-hover:opacity-100"
                   >
                     <ChevronLeft className="w-6 h-6 text-white" />
                   </button>
                   <button
                     onClick={nextImage}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 p-3 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 transition-all duration-300 opacity-0 group-hover:opacity-100"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 transition-all duration-300 opacity-0 group-hover:opacity-100"
                   >
                     <ChevronRight className="w-6 h-6 text-white" />
                   </button>
@@ -149,9 +159,36 @@ export default function CarDetails() {
               )}
 
               {/* Image Counter */}
-              <div className="absolute bottom-4 right-4 px-4 py-2 rounded-lg bg-black/50 backdrop-blur-sm text-white">
+              <div className="absolute bottom-4 right-4 z-10 px-4 py-2 rounded-lg bg-black/50 backdrop-blur-sm text-white text-sm">
                 {currentImageIndex + 1} / {car.images.length}
               </div>
+
+              {/* Dot indicators */}
+              {car.images.length > 1 && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-1.5">
+                  {car.images.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentImageIndex(i)}
+                      className={`h-1.5 rounded-full transition-all duration-300
+                        ${i === currentImageIndex ? "w-5 bg-white" : "w-1.5 bg-white/50"}`}
+                    />
+                  ))}
+                </div>
+              )}
+
+              {/* Auto-play progress bar */}
+              {car.images.length > 1 && !hovered && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white/20 z-10">
+                  <motion.div
+                    key={currentImageIndex}
+                    className="h-full bg-white/70"
+                    initial={{ width: "0%" }}
+                    animate={{ width: "100%" }}
+                    transition={{ duration: 3, ease: "linear" }}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Thumbnail Grid */}
@@ -208,9 +245,7 @@ export default function CarDetails() {
                   className="p-4 rounded-full border border-[var(--gold)]/50 hover:bg-[var(--gold)]/10 transition-colors duration-300"
                 >
                   <Heart
-                    className={`w-6 h-6 ${
-                      isFav ? "fill-[var(--gold)] text-[var(--gold)]" : ""
-                    }`}
+                    className={`w-6 h-6 ${isFav ? "fill-[var(--gold)] text-[var(--gold)]" : ""}`}
                   />
                 </button>
               </div>
@@ -233,7 +268,6 @@ export default function CarDetails() {
               >
                 {t("specifications")}
               </h3>
-
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex items-center space-x-3">
                   <Calendar className="w-5 h-5 text-[var(--gold)]" />
@@ -242,7 +276,6 @@ export default function CarDetails() {
                     <p>{car.year}</p>
                   </div>
                 </div>
-
                 <div className="flex items-center space-x-3">
                   <Gauge className="w-5 h-5 text-[var(--gold)]" />
                   <div>
@@ -252,7 +285,6 @@ export default function CarDetails() {
                     <p>{car.mileage.toLocaleString()} mi</p>
                   </div>
                 </div>
-
                 <div className="flex items-center space-x-3">
                   <Fuel className="w-5 h-5 text-[var(--gold)]" />
                   <div>
@@ -262,7 +294,6 @@ export default function CarDetails() {
                     <p>{car.engineType}</p>
                   </div>
                 </div>
-
                 <div className="flex items-center space-x-3">
                   <Settings className="w-5 h-5 text-[var(--gold)]" />
                   <div>
@@ -272,7 +303,6 @@ export default function CarDetails() {
                     <p>{car.transmission}</p>
                   </div>
                 </div>
-
                 <div className="flex items-center space-x-3">
                   <Palette className="w-5 h-5 text-[var(--gold)]" />
                   <div>
@@ -282,7 +312,6 @@ export default function CarDetails() {
                     <p>{car.exteriorColor}</p>
                   </div>
                 </div>
-
                 <div className="flex items-center space-x-3">
                   <Palette className="w-5 h-5 text-[var(--gold)]" />
                   <div>
@@ -316,9 +345,7 @@ export default function CarDetails() {
               >
                 {t("sellerContact")}
               </h3>
-
               <div className="space-y-4">
-                //
                 <button
                   onClick={handleContact}
                   className="w-full px-6 py-4 rounded-lg bg-gradient-to-r from-[var(--gold)] to-[var(--gold-dark)] text-white flex items-center justify-center space-x-2"
@@ -330,7 +357,6 @@ export default function CarDetails() {
                   <MessageCircle className="w-5 h-5" />
                   <span>{t("scheduleViewing")}</span>
                 </button>
-                //
                 {user && (
                   <div className="pt-4 border-t border-border">
                     <p className="text-sm text-muted-foreground mb-2">
@@ -347,13 +373,13 @@ export default function CarDetails() {
           </motion.div>
         </div>
       </div>
+
+      {/* Contact Modal */}
       {showContactModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-background rounded-2xl p-6 w-full max-w-md border border-[var(--gold)]/20">
             <h2 className="text-2xl mb-4 text-center">{t("sellerContact")}</h2>
-
             <div className="space-y-4">
-              {/* Phone */}
               <a
                 href={`tel:${car.contactDetails}`}
                 onClick={() => setShowContactModal(false)}
@@ -362,8 +388,6 @@ export default function CarDetails() {
                 <Phone className="w-5 h-5" />
                 <span>Call</span>
               </a>
-
-              {/* WhatsApp */}
               <a
                 href={`https://wa.me/${car.contactDetails}`}
                 target="_blank"
@@ -373,8 +397,6 @@ export default function CarDetails() {
                 <MessageCircle className="w-5 h-5" />
                 <span>WhatsApp</span>
               </a>
-
-              {/* Telegram */}
               <a
                 href={`https://t.me/${car.contactDetails}`}
                 target="_blank"
@@ -385,8 +407,6 @@ export default function CarDetails() {
                 <span>Telegram</span>
               </a>
             </div>
-
-            {/* Close */}
             <button
               onClick={() => setShowContactModal(false)}
               className="mt-6 w-full py-2 text-muted-foreground hover:text-white"

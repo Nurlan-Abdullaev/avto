@@ -16,6 +16,7 @@ export default function Home() {
     setDirection(index > current ? 1 : -1);
     setCurrent(index);
   };
+
   const cards = [
     {
       icon: Star,
@@ -29,6 +30,14 @@ export default function Home() {
     },
     { icon: Award, titleKey: "eliteService", descKey: "eliteServiceDesc" },
   ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setDirection(3);
+      setCurrent((prev) => (prev + 1) % cards.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const hasVisited = localStorage.getItem("elite_motors_visited");

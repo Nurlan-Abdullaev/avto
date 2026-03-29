@@ -1,8 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
-import { motion } from "framer-motion";
-import { Search, SlidersHorizontal, Heart } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Search,
+  SlidersHorizontal,
+  Heart,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import {
   getApprovedListings,
   CarListing,
@@ -11,6 +17,113 @@ import {
 } from "../../utils/storage";
 import { getCurrentUser } from "../../utils/auth";
 
+// ─── Image Carousel ───────────────────────────────────────────────────────────
+function ImageCarousel({ images, alt }: { images: string[]; alt: string }) {
+  const [current, setCurrent] = useState(0);
+  const [hovered, setHovered] = useState(false);
+
+  // Auto-play: switch every 2.5s when not hovered
+  useEffect(() => {
+    if (images.length <= 1 || hovered) return;
+    const timer = setInterval(() => {
+      setCurrent((c) => (c + 1) % images.length);
+    }, 2500);
+    return () => clearInterval(timer);
+  }, [images.length, hovered]);
+
+  const prev = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrent((c) => (c - 1 + images.length) % images.length);
+  };
+
+  const next = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrent((c) => (c + 1) % images.length);
+  };
+
+  const goTo = (i: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrent(i);
+  };
+
+  if (!images || images.length === 0) {
+    return <div className="w-full h-full bg-secondary" />;
+  }
+
+  return (
+    <div
+      className="relative w-full h-full overflow-hidden bg-secondary group/carousel"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {/* Slides */}
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.img
+          key={current}
+          src={images[current]}
+          alt={alt}
+          className="absolute inset-0 w-full h-full object-cover"
+          initial={{ opacity: 0, x: 60, scale: 1.04 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          exit={{ opacity: 0, x: -60, scale: 0.97 }}
+          transition={{ duration: 0.38, ease: [0.4, 0, 0.2, 1] }}
+        />
+      </AnimatePresence>
+
+      {/* Nav buttons — show only if more than 1 image */}
+      {images.length > 1 && (
+        <>
+          <button
+            onClick={prev}
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10
+                       w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm
+                       flex items-center justify-center
+                       opacity-0 group-hover/carousel:opacity-100
+                       transition-opacity duration-200 hover:bg-black/70"
+          >
+            <ChevronLeft className="w-4 h-4 text-white" />
+          </button>
+
+          <button
+            onClick={next}
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10
+                       w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm
+                       flex items-center justify-center
+                       opacity-0 group-hover/carousel:opacity-100
+                       transition-opacity duration-200 hover:bg-black/70"
+          >
+            <ChevronRight className="w-4 h-4 text-white" />
+          </button>
+
+          {/* Counter */}
+          <div
+            className="absolute bottom-3 left-3 z-10 px-2 py-0.5 rounded-full
+                          bg-black/50 backdrop-blur-sm text-white text-xs font-light tracking-widest"
+          >
+            {current + 1} / {images.length}
+          </div>
+
+          {/* Dot indicators */}
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex gap-1">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                onClick={(e) => goTo(i, e)}
+                className={`h-1.5 rounded-full transition-all duration-300
+                  ${i === current ? "w-4 bg-white" : "w-1.5 bg-white/50"}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─── Catalog ──────────────────────────────────────────────────────────────────
 export default function Catalog() {
   const { t } = useTranslation();
   const [listings, setListings] = useState<CarListing[]>([]);
@@ -33,13 +146,9 @@ export default function Catalog() {
     if (!user) return;
 
     const favs = new Set<string>();
-
     cars.forEach((car) => {
-      if (isFavorite(user.id, car.id)) {
-        favs.add(car.id);
-      }
+      if (isFavorite(user.id, car.id)) favs.add(car.id);
     });
-
     setFavorites(favs);
   }, [user]);
 
@@ -48,16 +157,12 @@ export default function Catalog() {
 
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-
-      filtered = filtered.filter((car) => {
-        const brand = car.brand.toLowerCase();
-        const model = car.model.toLowerCase();
-        const desc = car.description.toLowerCase();
-
-        return (
-          brand.includes(term) || model.includes(term) || desc.includes(term)
-        );
-      });
+      filtered = filtered.filter(
+        (car) =>
+          car.brand.toLowerCase().includes(term) ||
+          car.model.toLowerCase().includes(term) ||
+          car.description.toLowerCase().includes(term),
+      );
     }
 
     if (selectedBrand) {
@@ -83,15 +188,11 @@ export default function Catalog() {
       window.location.href = "/profile";
       return;
     }
-
     toggleFavorite(user.id, carId);
     setFavorites((prev) => {
       const newFavs = new Set(prev);
-      if (newFavs.has(carId)) {
-        newFavs.delete(carId);
-      } else {
-        newFavs.add(carId);
-      }
+      if (newFavs.has(carId)) newFavs.delete(carId);
+      else newFavs.add(carId);
       return newFavs;
     });
   };
@@ -278,15 +379,15 @@ export default function Catalog() {
                   to={`/car/${car.id}`}
                   className="group block rounded-2xl overflow-hidden border border-border bg-white dark:bg-background hover:shadow-xl transition-all duration-300 relative"
                 >
-                  {/* Image */}
-                  <div className="relative h-56 overflow-hidden bg-secondary">
-                    <img
-                      src={car.images?.[0] ?? ""}
+                  {/* ── Carousel ── */}
+                  <div className="relative h-56">
+                    <ImageCarousel
+                      images={car.images ?? []}
                       alt={`${car.brand} ${car.model}`}
-                      className="w-full h-full object-cover"
                     />
+
                     {/* Rating badge */}
-                    <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded-xl px-3 py-1.5">
+                    <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded-xl px-3 py-1.5">
                       <svg
                         width="14"
                         height="14"
@@ -301,7 +402,7 @@ export default function Catalog() {
                     </div>
 
                     {car.featured && (
-                      <div className="absolute top-3 left-3 px-3 py-1 rounded-lg bg-[var(--gold)] text-white text-xs font-bold">
+                      <div className="absolute top-3 left-3 z-10 px-3 py-1 rounded-lg bg-[var(--gold)] text-white text-xs font-bold">
                         {t("featured")}
                       </div>
                     )}
@@ -309,7 +410,6 @@ export default function Catalog() {
 
                   {/* Content */}
                   <div className="p-5">
-                    {/* Title */}
                     <h3
                       className="text-xl font-bold text-gray-900 dark:text-white mb-1"
                       style={{ fontFamily: "'Playfair Display', serif" }}
@@ -317,7 +417,6 @@ export default function Catalog() {
                       {car.brand} {car.model}
                     </h3>
 
-                    {/* Location */}
                     <div className="flex items-center gap-1 text-gray-400 text-sm mb-4">
                       <svg
                         width="12"
@@ -341,10 +440,8 @@ export default function Catalog() {
 
                     <hr className="border-gray-100 dark:border-border mb-4" />
 
-                    {/* Specs grid */}
                     <div className="grid grid-cols-2 gap-3 mb-5">
                       <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-muted-foreground">
-                        {/* Mileage icon */}
                         <svg
                           width="16"
                           height="16"
@@ -360,7 +457,6 @@ export default function Catalog() {
                         <span>{car.mileage.toLocaleString()} mi</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-muted-foreground">
-                        {/* Transmission icon */}
                         <svg
                           width="16"
                           height="16"
@@ -380,7 +476,6 @@ export default function Catalog() {
                         <span>{car.transmission}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-muted-foreground">
-                        {/* Fuel icon */}
                         <svg
                           width="16"
                           height="16"
@@ -398,7 +493,6 @@ export default function Catalog() {
                         <span>Petrol</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-muted-foreground">
-                        {/* Year/seats icon */}
                         <svg
                           width="16"
                           height="16"
@@ -417,7 +511,6 @@ export default function Catalog() {
                       </div>
                     </div>
 
-                    {/* Price + Button */}
                     <div className="flex items-center justify-between">
                       <div>
                         <span className="text-xs text-gray-400">From </span>
@@ -425,7 +518,6 @@ export default function Catalog() {
                           ${car.price.toLocaleString()}
                         </span>
                       </div>
-
                       <button
                         onClick={(e) => {
                           e.preventDefault();
@@ -441,7 +533,7 @@ export default function Catalog() {
                   {/* Favorite */}
                   <button
                     onClick={(e) => handleToggleFavorite(car.id, e)}
-                    className="absolute top-3 right-3 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors"
+                    className="absolute top-3 right-3 z-20 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-colors"
                   >
                     <Heart
                       className={`w-4 h-4 ${
