@@ -114,7 +114,7 @@ const resources = {
       averageListingPrice: "Средняя цена объявления",
       feature: "Сделать Featured",
       unfeature: "Убрать Featured",
-      featured: "Рекомендовано",
+      vip: "вип",
       confirmDeleteListing: "Вы уверены, что хотите удалить это объявление?",
       listingDeleted: "Объявление удалено",
 
@@ -308,7 +308,7 @@ const resources = {
       averageListingPrice: "Average Listing Price",
       feature: "Feature",
       unfeature: "Unfeature",
-      featured: "Featured",
+      vip: "vip",
       confirmDeleteListing: "Are you sure you want to delete this listing?",
       listingDeleted: "Listing deleted",
 
@@ -500,7 +500,7 @@ const resources = {
       averageListingPrice: "Орточо жарнак баасы",
       feature: "Көрсөтү кылуу",
       unfeature: "Көрсөтү алып салуу",
-      featured: "Көрсөтү",
+      vip: "вип",
       confirmDeleteListing: "Бул жарнакты чындап өчүргүңүз келеби?",
       listingDeleted: "Жарнак өчүрүлдү",
 
@@ -578,7 +578,6 @@ const resources = {
       readyLuxury: "Элиталык люкска даярсызбы?",
       joinCommunity: "Люкс унаа сүйүүчүлөрүнүн коомчулугуна кошулуңуз.",
       getStartedToday: "Бүгүн баштаңыз",
-      // featured: "ТАНДАЛГАН",
     },
   },
   kk: {
@@ -690,7 +689,7 @@ const resources = {
       averageListingPrice: "Орташа баға",
       feature: "Featured жасау",
       unfeature: "Featured алып тастау",
-      featured: "Ұсынылған",
+      vip: "вип",
       confirmDeleteListing: "Бұл жарнаманы жойғыңыз келетініне сенімдісіз бе?",
       listingDeleted: "Жарнама жойылды",
 
@@ -869,7 +868,7 @@ const resources = {
       averageListingPrice: "O'rtacha narx",
       feature: "Featured qilish",
       unfeature: "Featured olib tashlash",
-      featured: "Tavsiya etilgan",
+      vip: "вип",
       confirmDeleteListing: "E'lonni o'chirmoqchimisiz?",
       listingDeleted: "E'lon o'chirildi",
 
@@ -1058,7 +1057,7 @@ const resources = {
       averageListingPrice: "Орташа баға",
       feature: "Featured жасау",
       unfeature: "Featured алып тастау",
-      featured: "Ұсынылған",
+      vip: "вип",
       confirmDeleteListing: "Бұл жарнаманы жойғыңыз келетініне сенімдісіз бе?",
       listingDeleted: "Жарнама жойылды",
 
@@ -1124,8 +1123,6 @@ const resources = {
       readyLuxury: "Люксқа дайынсыз ба?",
       joinCommunity: "Біздің қауымдастыққа қосылыңыз.",
       getStartedToday: "Бүгін бастау",
-
-      // featured
     },
   },
 };

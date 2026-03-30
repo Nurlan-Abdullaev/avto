@@ -1,17 +1,130 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Star, Shield, Award } from "lucide-react";
+import {
+  ArrowRight,
+  Star,
+  Shield,
+  Award,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import EntryModal from "../components/EntryModal";
 import { getFeaturedListings, CarListing } from "../../utils/storage";
 
+// ─── Image Carousel (same as Catalog) ────────────────────────────────────────
+function ImageCarousel({
+  images,
+  alt,
+  startDelay = 0,
+}: {
+  images: string[];
+  alt: string;
+  startDelay?: number;
+}) {
+  const [current, setCurrent] = useState(0);
+  const [hovered, setHovered] = useState(false);
+
+  useEffect(() => {
+    if (images.length <= 1 || hovered) return;
+    // Each card waits its own delay before joining the cycle
+    const timeout = setTimeout(() => {
+      setCurrent((c) => (c + 1) % images.length);
+      const interval = setInterval(() => {
+        setCurrent((c) => (c + 1) % images.length);
+      }, 2500);
+      // store interval id for cleanup — trick: store on the timeout ref
+      (timeout as any)._interval = interval;
+    }, startDelay);
+    return () => {
+      clearTimeout(timeout);
+      if ((timeout as any)._interval) clearInterval((timeout as any)._interval);
+    };
+  }, [images.length, hovered, startDelay]);
+
+  const prev = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrent((c) => (c - 1 + images.length) % images.length);
+  };
+
+  const next = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrent((c) => (c + 1) % images.length);
+  };
+
+  const goTo = (i: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrent(i);
+  };
+
+  if (!images || images.length === 0)
+    return <div className="w-full h-full bg-secondary" />;
+
+  return (
+    <div
+      className="relative w-full h-full overflow-hidden bg-secondary group/carousel"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.img
+          key={current}
+          src={images[current]}
+          alt={alt}
+          className="absolute inset-0 w-full h-full object-cover"
+          initial={{ opacity: 0, x: 60, scale: 1.04 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          exit={{ opacity: 0, x: -60, scale: 0.97 }}
+          transition={{ duration: 0.38, ease: [0.4, 0, 0.2, 1] }}
+        />
+      </AnimatePresence>
+
+      {images.length > 1 && (
+        <>
+          <button
+            onClick={prev}
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-200 hover:bg-black/70"
+          >
+            <ChevronLeft className="w-4 h-4 text-white" />
+          </button>
+          <button
+            onClick={next}
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-200 hover:bg-black/70"
+          >
+            <ChevronRight className="w-4 h-4 text-white" />
+          </button>
+
+          <div className="absolute bottom-3 left-3 z-10 px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white text-xs font-light tracking-widest">
+            {current + 1} / {images.length}
+          </div>
+
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex gap-1">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                onClick={(e) => goTo(i, e)}
+                className={`h-1.5 rounded-full transition-all duration-300 ${i === current ? "w-4 bg-white" : "w-1.5 bg-white/50"}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ─── Home ─────────────────────────────────────────────────────────────────────
 export default function Home() {
   const { t } = useTranslation();
   const [showEntryModal, setShowEntryModal] = useState(false);
   const [featuredCars, setFeaturedCars] = useState<CarListing[]>([]);
   const [current, setCurrent] = useState(0);
   const [direction, setDirection] = useState(1);
+
   const goTo = (index: number) => {
     setDirection(index > current ? 1 : -1);
     setCurrent(index);
@@ -33,7 +146,7 @@ export default function Home() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setDirection(3);
+      setDirection(1);
       setCurrent((prev) => (prev + 1) % cards.length);
     }, 3000);
     return () => clearInterval(timer);
@@ -58,7 +171,6 @@ export default function Home() {
 
       {/* Hero Section */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
-        {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <img
             src="https://images.unsplash.com/photo-1563720360172-67b8f3dce741?w=1920&q=80"
@@ -68,14 +180,12 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-background" />
         </div>
 
-        {/* Decorative Elements */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[var(--gold)]/20 rounded-full blur-3xl animate-pulse" />
         <div
           className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[var(--gold)]/10 rounded-full blur-3xl animate-pulse"
           style={{ animationDelay: "1s" }}
         />
 
-        {/* Content */}
         <div className="relative z-10 container mx-auto px-4 text-center">
           <motion.div
             initial={{ y: 50, opacity: 0 }}
@@ -109,7 +219,6 @@ export default function Home() {
                 <span>{t("exploreCollection")}</span>
                 <ArrowRight className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" />
               </Link>
-
               <button
                 onClick={() => setShowEntryModal(true)}
                 className="px-8 py-4 rounded-lg border-2 border-[var(--gold)] text-white hover:bg-[var(--gold)]/10 transition-all duration-300"
@@ -120,7 +229,6 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* Scroll Indicator */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -137,7 +245,6 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* Features Section */}
       {/* Features Section */}
       <section className="py-24 bg-secondary/30">
         <div className="container mx-auto px-4">
@@ -204,18 +311,12 @@ export default function Home() {
                 </motion.div>
               </AnimatePresence>
             </div>
-
-            {/* Dots */}
             <div className="flex justify-center gap-2 mt-6">
               {cards.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => goTo(i)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    i === current
-                      ? "bg-[var(--gold)] w-4"
-                      : "bg-muted-foreground/40 w-2"
-                  }`}
+                  className={`h-2 rounded-full transition-all duration-300 ${i === current ? "bg-[var(--gold)] w-4" : "bg-muted-foreground/40 w-2"}`}
                 />
               ))}
             </div>
@@ -257,15 +358,16 @@ export default function Home() {
                     to={`/car/${car.id}`}
                     className="group block rounded-2xl overflow-hidden border border-border bg-white dark:bg-background hover:shadow-xl transition-all duration-300 relative"
                   >
-                    {/* Image */}
-                    <div className="relative h-56 overflow-hidden bg-secondary">
-                      <img
-                        src={car.images[0]}
+                    {/* ── Carousel ── */}
+                    <div className="relative h-56">
+                      <ImageCarousel
+                        images={car.images ?? []}
                         alt={`${car.brand} ${car.model}`}
-                        className="w-full h-full object-cover"
+                        startDelay={index * 800}
                       />
+
                       {/* Rating badge */}
-                      <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded-xl px-3 py-1.5">
+                      <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded-xl px-3 py-1.5">
                         <svg
                           width="14"
                           height="14"
@@ -279,8 +381,8 @@ export default function Home() {
                         </span>
                       </div>
 
-                      <div className="absolute top-3 left-3 px-3 py-1 rounded-lg bg-[var(--gold)] text-white text-xs font-bold">
-                        {t("featured")}
+                      <div className="absolute top-3 left-3 z-10 px-3 py-1 rounded-lg bg-[var(--gold)] text-white text-xs font-bold">
+                        {t("vip")}
                       </div>
                     </div>
 
@@ -434,11 +536,7 @@ export default function Home() {
             viewport={{ once: true }}
             variants={{
               hidden: {},
-              visible: {
-                transition: {
-                  staggerChildren: 0.15,
-                },
-              },
+              visible: { transition: { staggerChildren: 0.15 } },
             }}
             className="grid md:grid-cols-3 gap-8"
           >

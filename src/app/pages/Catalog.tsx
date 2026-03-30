@@ -18,18 +18,33 @@ import {
 import { getCurrentUser } from "../../utils/auth";
 
 // ─── Image Carousel ───────────────────────────────────────────────────────────
-function ImageCarousel({ images, alt }: { images: string[]; alt: string }) {
+function ImageCarousel({
+  images,
+  alt,
+  startDelay = 0,
+}: {
+  images: string[];
+  alt: string;
+  startDelay?: number;
+}) {
   const [current, setCurrent] = useState(0);
   const [hovered, setHovered] = useState(false);
 
-  // Auto-play: switch every 2.5s when not hovered
+  // Auto-play with per-card delay so they switch out of sync
   useEffect(() => {
     if (images.length <= 1 || hovered) return;
-    const timer = setInterval(() => {
+    const timeout = setTimeout(() => {
       setCurrent((c) => (c + 1) % images.length);
-    }, 2500);
-    return () => clearInterval(timer);
-  }, [images.length, hovered]);
+      const interval = setInterval(() => {
+        setCurrent((c) => (c + 1) % images.length);
+      }, 2500);
+      (timeout as any)._interval = interval;
+    }, startDelay);
+    return () => {
+      clearTimeout(timeout);
+      if ((timeout as any)._interval) clearInterval((timeout as any)._interval);
+    };
+  }, [images.length, hovered, startDelay]);
 
   const prev = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -384,6 +399,7 @@ export default function Catalog() {
                     <ImageCarousel
                       images={car.images ?? []}
                       alt={`${car.brand} ${car.model}`}
+                      startDelay={index * 800}
                     />
 
                     {/* Rating badge */}
