@@ -13,7 +13,7 @@ import {
 import EntryModal from "../components/EntryModal";
 import { getFeaturedListings, CarListing } from "../../utils/storage";
 
-// ─── Image Carousel (same as Catalog) ────────────────────────────────────────
+// ─── Image Carousel ────────────────────────────────────────────────────────────
 function ImageCarousel({
   images,
   alt,
@@ -24,24 +24,47 @@ function ImageCarousel({
   startDelay?: number;
 }) {
   const [current, setCurrent] = useState(0);
-  const [hovered, setHovered] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Запускаем автослайдшоу
+  const startAuto = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      setCurrent((c) => (c + 1) % images.length);
+    }, 2500);
+  };
+
+  const stopAuto = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
 
   useEffect(() => {
-    if (images.length <= 1 || hovered) return;
-    // Each card waits its own delay before joining the cycle
+    if (images.length <= 1) return;
+
     const timeout = setTimeout(() => {
-      setCurrent((c) => (c + 1) % images.length);
-      const interval = setInterval(() => {
-        setCurrent((c) => (c + 1) % images.length);
-      }, 2500);
-      // store interval id for cleanup — trick: store on the timeout ref
-      (timeout as any)._interval = interval;
+      if (!paused) startAuto();
     }, startDelay);
+
     return () => {
       clearTimeout(timeout);
-      if ((timeout as any)._interval) clearInterval((timeout as any)._interval);
+      stopAuto();
     };
-  }, [images.length, hovered, startDelay]);
+  }, [images.length, startDelay]);
+
+  // Пауза / возобновление при наведении
+  useEffect(() => {
+    if (images.length <= 1) return;
+    if (paused) {
+      stopAuto();
+    } else {
+      startAuto();
+    }
+    return () => stopAuto();
+  }, [paused, images.length]);
 
   const prev = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -67,14 +90,15 @@ function ImageCarousel({
   return (
     <div
       className="relative w-full h-full overflow-hidden bg-secondary group/carousel"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
     >
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.img
           key={current}
           src={images[current]}
           alt={alt}
+          draggable={false}
           className="absolute inset-0 w-full h-full object-cover"
           initial={{ opacity: 0, x: 60, scale: 1.04 }}
           animate={{ opacity: 1, x: 0, scale: 1 }}
@@ -85,12 +109,15 @@ function ImageCarousel({
 
       {images.length > 1 && (
         <>
+          {/* Стрелка назад */}
           <button
             onClick={prev}
             className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-200 hover:bg-black/70"
           >
             <ChevronLeft className="w-4 h-4 text-white" />
           </button>
+
+          {/* Стрелка вперёд */}
           <button
             onClick={next}
             className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-200 hover:bg-black/70"
@@ -98,16 +125,20 @@ function ImageCarousel({
             <ChevronRight className="w-4 h-4 text-white" />
           </button>
 
+          {/* Счётчик */}
           <div className="absolute bottom-3 left-3 z-10 px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-sm text-white text-xs font-light tracking-widest">
             {current + 1} / {images.length}
           </div>
 
+          {/* Точки */}
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex gap-1">
             {images.map((_, i) => (
               <button
                 key={i}
                 onClick={(e) => goTo(i, e)}
-                className={`h-1.5 rounded-full transition-all duration-300 ${i === current ? "w-4 bg-white" : "w-1.5 bg-white/50"}`}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  i === current ? "w-4 bg-white" : "w-1.5 bg-white/50"
+                }`}
               />
             ))}
           </div>
@@ -117,7 +148,7 @@ function ImageCarousel({
   );
 }
 
-// ─── Home ─────────────────────────────────────────────────────────────────────
+// ─── Home ──────────────────────────────────────────────────────────────────────
 export default function Home() {
   const { t } = useTranslation();
   const [showEntryModal, setShowEntryModal] = useState(false);
@@ -316,7 +347,11 @@ export default function Home() {
                 <button
                   key={i}
                   onClick={() => goTo(i)}
-                  className={`h-2 rounded-full transition-all duration-300 ${i === current ? "bg-[var(--gold)] w-4" : "bg-muted-foreground/40 w-2"}`}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    i === current
+                      ? "bg-[var(--gold)] w-4"
+                      : "bg-muted-foreground/40 w-2"
+                  }`}
                 />
               ))}
             </div>
@@ -358,7 +393,7 @@ export default function Home() {
                     to={`/car/${car.id}`}
                     className="group block rounded-2xl overflow-hidden border border-border bg-white dark:bg-background hover:shadow-xl transition-all duration-300 relative"
                   >
-                    {/* ── Carousel ── */}
+                    {/* Карусель */}
                     <div className="relative h-56">
                       <ImageCarousel
                         images={car.images ?? []}
@@ -366,7 +401,7 @@ export default function Home() {
                         startDelay={index * 800}
                       />
 
-                      {/* Rating badge */}
+                      {/* Просмотры */}
                       <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded-xl px-3 py-1.5">
                         <svg
                           width="14"
@@ -386,7 +421,7 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* Content */}
+                    {/* Контент карточки */}
                     <div className="p-5">
                       <h3
                         className="text-xl font-bold text-gray-900 dark:text-white mb-1"
