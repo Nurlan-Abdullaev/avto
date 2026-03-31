@@ -26,8 +26,9 @@ function ImageCarousel({
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
 
-  // Запускаем автослайдшоу
   const startAuto = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     intervalRef.current = setInterval(() => {
@@ -44,18 +45,15 @@ function ImageCarousel({
 
   useEffect(() => {
     if (images.length <= 1) return;
-
     const timeout = setTimeout(() => {
       if (!paused) startAuto();
     }, startDelay);
-
     return () => {
       clearTimeout(timeout);
       stopAuto();
     };
   }, [images.length, startDelay]);
 
-  // Пауза / возобновление при наведении
   useEffect(() => {
     if (images.length <= 1) return;
     if (paused) {
@@ -84,6 +82,40 @@ function ImageCarousel({
     setCurrent(i);
   };
 
+  // ── Touch / свайп ───────────────────────────────────────────────────────────
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    setPaused(true);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+
+    // Горизонтальный свайп, не вертикальный скролл
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+      e.stopPropagation();
+      if (dx < 0) {
+        setCurrent((c) => (c + 1) % images.length); // влево → вперёд
+      } else {
+        setCurrent((c) => (c - 1 + images.length) % images.length); // вправо → назад
+      }
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+    setPaused(false);
+  };
+
+  const handleTouchCancel = () => {
+    touchStartX.current = null;
+    touchStartY.current = null;
+    setPaused(false);
+  };
+
   if (!images || images.length === 0)
     return <div className="w-full h-full bg-secondary" />;
 
@@ -92,6 +124,9 @@ function ImageCarousel({
       className="relative w-full h-full overflow-hidden bg-secondary group/carousel"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchCancel}
     >
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.img
@@ -109,15 +144,13 @@ function ImageCarousel({
 
       {images.length > 1 && (
         <>
-          {/* Стрелка назад */}
+          {/* Стрелки — видны на десктопе при hover */}
           <button
             onClick={prev}
             className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-200 hover:bg-black/70"
           >
             <ChevronLeft className="w-4 h-4 text-white" />
           </button>
-
-          {/* Стрелка вперёд */}
           <button
             onClick={next}
             className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity duration-200 hover:bg-black/70"
@@ -279,7 +312,6 @@ export default function Home() {
       {/* Features Section */}
       <section className="py-24 bg-secondary/30">
         <div className="container mx-auto px-4">
-          {/* Desktop */}
           <div className="hidden md:grid md:grid-cols-3 gap-8">
             {cards.map((card, i) => {
               const Icon = card.icon;
@@ -307,7 +339,6 @@ export default function Home() {
             })}
           </div>
 
-          {/* Mobile карусель */}
           <div className="md:hidden">
             <div className="relative overflow-hidden">
               <AnimatePresence custom={direction} mode="wait">
@@ -393,7 +424,6 @@ export default function Home() {
                     to={`/car/${car.id}`}
                     className="group block rounded-2xl overflow-hidden border border-border bg-white dark:bg-background hover:shadow-xl transition-all duration-300 relative"
                   >
-                    {/* Карусель */}
                     <div className="relative h-56">
                       <ImageCarousel
                         images={car.images ?? []}
@@ -401,7 +431,6 @@ export default function Home() {
                         startDelay={index * 800}
                       />
 
-                      {/* Просмотры */}
                       <div className="absolute bottom-3 right-3 z-10 flex items-center gap-1.5 bg-black/50 backdrop-blur-sm rounded-xl px-3 py-1.5">
                         <svg
                           width="14"
@@ -421,7 +450,6 @@ export default function Home() {
                       </div>
                     </div>
 
-                    {/* Контент карточки */}
                     <div className="p-5">
                       <h3
                         className="text-xl font-bold text-gray-900 dark:text-white mb-1"
